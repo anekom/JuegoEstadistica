@@ -7,10 +7,77 @@ library(nortest)
 library(tseries)
 library(RcmdrMisc)
 library(lmtest)
+library(shinyalert)
+
 
 datos <-read.csv("www/dataset.csv",dec = ",")
+usuarios <-read.csv("www/usuarios.csv",dec = ",")
 
 shinyServer(function(input, output) {
+  
+  
+  hideTab(inputId = "tabset", target = "game", session = getDefaultReactiveDomain())
+   
+  observeEvent(input$login, {
+    
+    if(input$loginName %in% usuarios$username){
+      user <- usuarios[input$loginName == usuarios$username && input$loginPassword == usuarios$password, ]
+      
+
+      if(nrow(user) == 0){
+        shinyalert("Oops!", "contrasenya incorrecta.", type = "error")
+      }else{
+        
+        updateTabsetPanel(session = getDefaultReactiveDomain(), "tabset", selected = "game")
+        #showTab(inputId = "tabset", target = "game", session = getDefaultReactiveDomain())
+        
+      }
+
+    }else {
+      
+      shinyalert("Oops!", "no hay un usuario registrado con ese nombre, create una cuenta en el apartado de abajo.", type = "error")
+      
+    }
+    
+    
+    
+    
+  })
+  
+  observeEvent(input$singin, {
+    
+    if(!(input$singinName %in% usuarios$username)){
+      
+        
+        
+        
+        str(usuarios)
+        
+        #newuser <- data.frame(input$singinName, input$singinPassword, input$Univesidad,0,0)
+        #names(newuser) <- c(username, password, universidad, lvl, score)
+        
+        #str(newuser)
+        username <- input$singinName
+        password <- input$singinPassword
+        universidad <- input$Universidad
+
+        
+        usuarios <- rbind(usuarios, c(username, password, universidad, 0, 0))
+        
+        
+        updateTabsetPanel(session = getDefaultReactiveDomain(), "tabset", selected = "game")
+        #showTab(inputId = "tabset", target = "game", session = getDefaultReactiveDomain())
+      
+    }else {
+      
+      shinyalert("Oops!", "ya hay un usuario registrado con ese nombre, usa otro.", type = "error")
+      
+    }
+    
+    
+    
+    
+  })
    
   output$RawData <- DT::renderDataTable(
     DT::datatable({

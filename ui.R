@@ -9,8 +9,11 @@ library(RcmdrMisc)
 library(lmtest)
 library(shinyWidgets)
 library(fontawesome)
+library(shinyalert)
+library(shinyjs)
 
 datos <-read.csv("www/dataset.csv",dec = ",")
+usuarios <-read.csv("www/usuarios.csv",dec = ",")
 
 ## Modifying inbuilt textInputAddon to accept password of shinyWidgets 
 
@@ -44,21 +47,26 @@ passwordInputAddon <- function (inputId, label, value = "", placeholder = NULL, 
 
 
 shinyUI(fluidPage(theme = shinytheme("cerulean"),
+                  useShinyjs(),
+                  #tags$script(src = "game.js"),
+                  #tags$script(src = "modernizr-1.5.min.js"),
+                  #tags$script(src = "canvas.js"),
+                  useShinyalert(),
 
   #titlePanel("Didactic modeling process: Linear regression for a safety issue in rural areas of Antioquia - Colombia"),
-    navbarPage("Juego",
+    navbarPage("Juego", id = "tabset",
                tabPanel(icon("home"),
                         
                         fluidRow(
                           column(8, align = "center", offset = 2,
                                  h4(p("Si ya tienes cuenta",style="color:black;text-align:center")),
-                                 textInputAddon("name", label = "", placeholder = "Username", addon = icon("user"),width = "45%"),
+                                 textInputAddon("loginName", label = "", placeholder = "Username", addon = icon("user"),width = "45%"),
                                  tags$style(type="text/css", "#string { height: 50px; width: 100%; text-align:center; font-size: 30px; display: block;}")
                           )
                         ),
                         fluidRow(
                           column(8, align = "center", offset = 2,
-                                 passwordInputAddon("password", label = "", placeholder = "Password", addon = icon("key"),width = "45%"),
+                                 passwordInputAddon("loginPassword", label = "", placeholder = "Password", addon = icon("key"),width = "45%"),
                                  tags$style(type="text/css", "#string { height: 50px; width: 100%; text-align:center; font-size: 30px; display: block;}")
                           )
                         ),
@@ -78,20 +86,20 @@ shinyUI(fluidPage(theme = shinytheme("cerulean"),
                         
                         fluidRow(
                           column(8, align = "center", offset = 2,
-                                 h4(p("Sino tienes cuenta",style="color:black;text-align:center")),
-                                 textInputAddon("name", label = "", placeholder = "Username", addon = icon("user"),width = "45%"),
+                                 h4(p("Si no tienes cuenta",style="color:black;text-align:center")),
+                                 textInputAddon("singinName", label = "", placeholder = "Username", addon = icon("user"),width = "45%"),
                                  tags$style(type="text/css", "#string { height: 50px; width: 100%; text-align:center; font-size: 30px; display: block;}")
                           )
                         ),
                         fluidRow(
                           column(8, align = "center", offset = 2,
-                                 passwordInputAddon("password", label = "", placeholder = "Password", addon = icon("key"),width = "45%"),
+                                 passwordInputAddon("singinPassword", label = "", placeholder = "Password", addon = icon("key"),width = "45%"),
                                  tags$style(type="text/css", "#string { height: 50px; width: 100%; text-align:center; font-size: 30px; display: block;}")
                           )
                         ),
                         fluidRow(
                           column(6, align = "center", offset = 3,
-                            selectInput("Profesor", p("Por favor selecciona tu profesor:",style="color:black; text-align:center"), choices=c("Monica"=1,"Maria Victoria"=2,"Gema"=3))
+                            selectInput("Universidad", p("Por favor selecciona tu universidad:",style="color:black; text-align:center"), choices=c("Complutense de Madrid"=1,"Francisco de Vitoria"=2,"Castilla la Mancha"=3))
                             
                           )
                         ),
@@ -99,110 +107,28 @@ shinyUI(fluidPage(theme = shinytheme("cerulean"),
                         
                         fluidRow(
                           column(6, align = "center", offset = 3,
-                                 actionButton("login",label = "Sing In", width = "60%"))    
+                                 actionButton("singin",label = "Sing In", width = "60%"))    
                         ) 
                                           
                         
                         
                         
                         ),
-               tabPanel("Step 1",
+               tabPanel("game",
                         
-                        fluidRow(column(width=2),
-                          column(
-                                  h4(p("Normality",style="color:black;text-align:center")),
-                                  width=8,style="background-color:lavender;border-radius: 10px")
-                                  ),
-                        br(),
-                        fluidRow(column(width=2, icon("hand-point-right","fa-5x"),align="center"),
-                                 column(
-                                  p("In order to make inferences about the results of this modeling process, it is necessary to establish 
-                                     distributional assumptions, and to make things easier we are going to assume that the response (dependent) 
-                                     variable is normally distributed; following this assumption, we will try to achieve this:",style="color:black;text-align:justify"),
-                                  withMathJax(),
-                                                p('$$H_0:~Y ~ \\sim ~ Normal( ~\\mu ~,~ \\sigma~ )$$',style="color:black;border:1px solid black;background-color:white"),
-                                  p("In our case we will take as a response variable", strong(em("Personal injuries")), "since it represents a big 
-                                    safety problem where the physical integrity of the people is threatened. We will try to explain this 
-                                    variable through education issues, others related to sports and even through other safety problems. All of these,
-                                    represented through the other variables in the dataset",style="color:black;text-align:justify"),
-                                   width=8,style="background-color:lavender;border-radius: 10px")
-                                  ),
-                        br(),
-                        fluidRow(column(width=2),
-                                 column(
-                                   p("Let's do it. You are going to find some graphical and analytical tests in order to conclude about the previous hypothesis",style="color:black;text-align:center"),
-                                   width=8,style="background-color:papayawhip;border-radius: 10px")
+                        tags$div(id="prueba",
+                                 style='color:green;',
+                          list(h4("<strong>Raw HTML!</strong>"), hr())
                         ),
-                        hr(),
-                        tags$style(".fa-chart-pie {color:#E87722}"),
-                        h3(p(em("Graphical tests "),icon("chart-pie",lib = "font-awesome"),style="color:black;text-align:center")),
-                        tags$style(HTML(".js-irs-0 .irs-single, .js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {background: coral; border-top: 1px coral; border-bottom: 1px coral;border-left: 1px coral}")),
-                        tags$style(HTML(".js-irs-0 .irs-max, .js-irs-0 .irs-min {background:papayawhip}")),
                         
-                        br(),
-                        sidebarLayout(
-                                      sidebarPanel(
-                                        
-                                        sliderInput("Transformacion",p("Try power transformations to achieve the normality of",em("Personal injuries"),style="color:black;text-align:center"),
-                                                                        value=1,
-                                                                        min=-3,
-                                                                        max=3,
-                                                                        step=0.01),
-                                        br(),
-                                        
-                                        p("Remember we are looking for this (click on the next image to view it in a new tab)",style="color:black;text-align:center"),
-                                        br(),
-                                        a(href="https://drive.google.com/file/d/1eXf5FHKwMIt5aW--64eaB0_UArB_N-v4/view?usp=sharing", tags$img(src="collage.png",width="380px",height="130px",style="border:1px solid black"),
-                                              target="_blank"),
-                                        br(),
-                                        br(),
-                                        tags$style(".fa-wikipedia-w {color:black}"),
-                                        p("Read more about normal distribution here → ", a(href="https://en.wikipedia.org/wiki/Normal_distribution", icon("wikipedia-w"),target="_blank"),style="color:black;text-align:center")
-                                      
-                                        
-                                        
-                                      ),
-                                      mainPanel(
-                                        
-                                        fluidRow(
-                                                  column(br(),plotOutput("Histograma"),br(),width=4,style="border:1px solid black"),
-                                                  column(br(),plotOutput("Boxplot"),br(),width=4,style="border: 1px solid black;border-left: none"),
-                                                  column(br(),plotOutput("qqPlot"),br(),width=4,style="border:1px solid black;border-left:none")
-                                                  
-                                                  )
-                                      )),
-                        hr(),
-                        tags$style(".glyphicon-folder-open {color:#E87722}"),
-                        h3(p(em("Analytical tests  "),icon("folder-open",lib = "glyphicon"),style="color:black;text-align:center")),
-                        br(),
-                        sidebarLayout(
-                          
-                                    sidebarPanel(
-                                      
-                                      selectInput("PruebaAnalitica",p("Please select the test you want to try:",style="color:black; text-align:center"),choices=c("Shapiro-Wilk"=1,"Anderson-Darling"=2,"Cramér-von Mises"=3,"Kolmogorov-Smirnov"=4,"Jarque-Bera"=5)),
-                                      uiOutput("ReadMore")
-                                    ),
-                                    mainPanel(
-                                      
-                                      fluidRow(
-                                        
-                                        tags$head(tags$style("#Conclusion1{color: navy;
-                                                      font-size: 15px;
-                                                             font-style: italic;
-                                                             font-weight: bold;
-                                                             text-align: center
-                                                             }")),
-                                        tags$head(tags$style("#Prueba{height: 155px; border: 1px solid black; background-color: lavender}")),
-                                        column(verbatimTextOutput("Prueba"),
-                                               br(),width = 6),
-                                        column(br(),
-                                               p("Remember we are looking for a p-value greater than 0.05 (for a confidence level of 95%), so:",style="color:black"),
-                                               br(),
-                                               textOutput("Conclusion1"),
-                                               br(),width = 6,style="background-color:lavender;border-left:8px solid blue")
-                                        
-                                      )
-                                    ))
+                        tags$div(id="pacman"),
+                        
+                          #tags$script(src = "pacman.js"),
+                          #tags$script(src = "modernizr-1.5.min.js"),
+                          #tags$script(src = "canvas.js")
+                        
+                        
+                        
                         ),
                tabPanel("Step 2",
                         
